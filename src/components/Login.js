@@ -1,11 +1,73 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Header from "./Header";
+import {
+  checkValidEmail,
+  checkValidPassword,
+  checkValidName,
+} from "../utils/validate";
 
 const Login = () => {
+  const eRef = useRef(null);
+  const pRef = useRef(null);
+  const nameRef = useRef(null);
+
   const [isSignInForm, setIsSignInForm] = useState(true);
 
+  const initialErrorMessage = {
+    email: "",
+    password: "",
+    name: "",
+  };
+
+  const [errorMessage, setErrorMessage] = useState(initialErrorMessage);
+
   const toggleSignInForm = () => {
+    setErrorMessage(initialErrorMessage);
+    eRef.current.value = "";
+    pRef.current.value = "";
     setIsSignInForm(!isSignInForm);
+  };
+
+  const validateFormData = () => {
+    const validEmailResult = checkValidEmail(eRef.current.value);
+    const validPasswordResult = checkValidPassword(pRef.current.value);
+    let validNameResult;
+    if (!isSignInForm) {
+      validNameResult = checkValidName(nameRef.current.value);
+
+      if (
+        validEmailResult !== null &&
+        validPasswordResult !== null &&
+        validNameResult !== null
+      ) {
+        setErrorMessage({
+          email: validEmailResult,
+          password: validPasswordResult,
+          name: validNameResult,
+        });
+        return;
+      }
+    } else {
+      if (validEmailResult !== null && validPasswordResult !== null) {
+        setErrorMessage({
+          email: validEmailResult,
+          password: validPasswordResult,
+        });
+        return;
+      }
+    }
+
+    if (validEmailResult !== null) {
+      setErrorMessage({ email: validEmailResult });
+    }
+    if (validPasswordResult !== null) {
+      setErrorMessage({ password: validPasswordResult });
+    }
+  };
+
+  const handleClick = () => {
+    //validate form data
+    validateFormData();
   };
 
   return (
@@ -23,33 +85,63 @@ const Login = () => {
         <h1 className="text-white text-[32px] font-medium">
           {isSignInForm ? "Sign In" : "Sign Up"}
         </h1>
-        <form action="" className="flex flex-col my-6">
+        <form
+          onSubmit={(e) => e.preventDefault()}
+          className="flex flex-col my-6"
+        >
           {!isSignInForm && (
-            <input
-              type="text"
-              className="placeholder-gray-300 pl-4 py-3 rounded text-white bg-neutral-700 focus:bg-neutral-600 outline-none mb-6"
-              placeholder="Name"
-            />
+            <div className="flex flex-col mb-6 w-80">
+              <input
+                ref={nameRef}
+                type="text"
+                className="placeholder-gray-300 pl-4 py-3 rounded text-white bg-neutral-700 focus:bg-neutral-600 outline-none"
+                placeholder="Name"
+                onBlur={() => setErrorMessage({ name: "" })}
+              />
+              <p className="text-sm text-red-600 mt-1 font-medium">
+                {errorMessage.name}
+              </p>
+            </div>
           )}
+          <div className="flex flex-col mb-6 w-80">
+            <input
+              ref={eRef}
+              type="email"
+              className="placeholder-gray-300 pl-4 py-3 rounded text-white bg-neutral-700 focus:bg-neutral-600 outline-none"
+              placeholder="Email"
+              onBlur={() => setErrorMessage({ email: "" })}
+            />
+            <p className="text-sm text-red-600 mt-1 font-medium">
+              {errorMessage.email}
+            </p>
+          </div>
+          <div className="flex flex-col mb-8 w-80">
+            <input
+              ref={pRef}
+              type="password"
+              className="placeholder-gray-300 pl-4 py-3 rounded text-white bg-neutral-700 focus:bg-neutral-600 outline-none"
+              placeholder="Password"
+              onBlur={() => setErrorMessage({ password: "" })}
+            />
+            <p className="text-sm text-red-600 mt-1 font-medium break-keep">
+              {errorMessage.password}
+            </p>
+          </div>
 
-          <input
-            type="email"
-            className="placeholder-gray-300 pl-4 py-3 rounded text-white bg-neutral-700 focus:bg-neutral-600 outline-none mb-6"
-            placeholder="Email"
-          />
-          <input
-            type="password"
-            className="placeholder-gray-300 pl-4 py-3 rounded text-white bg-neutral-700 focus:bg-neutral-600 outline-none mb-8"
-            placeholder="Password"
-          />
-          <button className="bg-red-600 text-white p-3 rounded">
+          <button
+            className="bg-red-600 text-white p-3 rounded"
+            onClick={handleClick}
+          >
             {isSignInForm ? "Sign In" : "Sign Up"}
           </button>
         </form>
-        <p className=" text-gray-500/75" onClick={toggleSignInForm}>
+        <p className=" text-gray-500/75">
           {" "}
           {isSignInForm ? "New to Netflix?" : "Already a user?"}
-          <span className="text-white cursor-pointer">
+          <span
+            className="text-white cursor-pointer"
+            onClick={toggleSignInForm}
+          >
             {"  "}
             {isSignInForm ? "Sign Up Now" : "Sign In"}.
           </span>
