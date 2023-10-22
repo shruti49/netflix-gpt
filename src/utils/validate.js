@@ -4,7 +4,6 @@ export const checkValidEmail = (email) => {
       email
     );
   if (!isValidEmail) return "Please enter a valid email address";
-
   return null;
 };
 

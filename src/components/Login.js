@@ -5,6 +5,11 @@ import {
   checkValidPassword,
   checkValidName,
 } from "../utils/validate";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { auth } from "../utils/firebase";
 
 const Login = () => {
   const eRef = useRef(null);
@@ -31,43 +36,64 @@ const Login = () => {
   const validateFormData = () => {
     const validEmailResult = checkValidEmail(eRef.current.value);
     const validPasswordResult = checkValidPassword(pRef.current.value);
-    let validNameResult;
+    let validNameResult = null;
     if (!isSignInForm) {
       validNameResult = checkValidName(nameRef.current.value);
-
-      if (
-        validEmailResult !== null &&
-        validPasswordResult !== null &&
-        validNameResult !== null
-      ) {
-        setErrorMessage({
-          email: validEmailResult,
-          password: validPasswordResult,
-          name: validNameResult,
-        });
-        return;
-      }
-    } else {
-      if (validEmailResult !== null && validPasswordResult !== null) {
-        setErrorMessage({
-          email: validEmailResult,
-          password: validPasswordResult,
-        });
-        return;
-      }
     }
 
-    if (validEmailResult !== null) {
-      setErrorMessage({ email: validEmailResult });
-    }
-    if (validPasswordResult !== null) {
-      setErrorMessage({ password: validPasswordResult });
-    }
+    setErrorMessage({
+      email: validEmailResult,
+      password: validPasswordResult,
+      name: validNameResult,
+    });
+  };
+
+  const handleSignUp = () => {
+    createUserWithEmailAndPassword(auth, eRef.current.value, pRef.current.value)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log(user);
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+
+        console.log(errorCode, errorMessage);
+      });
+  };
+
+  const handleSignIn = () => {
+    signInWithEmailAndPassword(auth, eRef.current.value, pRef.current.value)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        console.log(user);
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(errorCode, errorMessage);
+      });
   };
 
   const handleClick = () => {
     //validate form data
     validateFormData();
+    console.log(errorMessage);
+    if (
+      errorMessage.email !== null ||
+      errorMessage.name !== null ||
+      errorMessage.password !== null
+    ) {
+     console.log(errorMessage);
+      return;
+    }
+
+    if (!isSignInForm) {
+      handleSignUp();
+    } else {
+      handleSignIn();
+    }
   };
 
   return (
@@ -90,40 +116,69 @@ const Login = () => {
           className="flex flex-col my-6"
         >
           {!isSignInForm && (
-            <div className="flex flex-col mb-6 w-80">
+            <div className="flex flex-col mb-6 w-80 relative">
               <input
                 ref={nameRef}
                 type="text"
-                className="placeholder-gray-300 pl-4 py-3 rounded text-white bg-neutral-700 focus:bg-neutral-600 outline-none"
-                placeholder="Name"
+                className={`block bg-neutral-700 rounded px-2.5 pb-2.5 pt-5 w-full text-sm text-white appearance-none focus:outline-none focus:border-b-2 border-b-2 focus:border-orange-600 peer ${
+                  errorMessage.name
+                    ? " border-orange-600"
+                    : "border-neutral-700"
+                }`}
+                placeholder=" "
                 onBlur={() => setErrorMessage({ name: "" })}
               />
-              <p className="text-sm text-red-600 mt-1 font-medium">
+              <label
+                htmlFor="floating_filled"
+                className="absolute text-sm text-gray-300 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] left-2.5 peer-focus:text-gray-300 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4"
+              >
+                Full Name
+              </label>
+              <p className="text-sm text-orange-600 mt-1 font-medium">
                 {errorMessage.name}
               </p>
             </div>
           )}
-          <div className="flex flex-col mb-6 w-80">
+          <div className="flex flex-col mb-6 w-80 relative">
             <input
               ref={eRef}
               type="email"
-              className="placeholder-gray-300 pl-4 py-3 rounded text-white bg-neutral-700 focus:bg-neutral-600 outline-none"
-              placeholder="Email"
+              className={`block bg-neutral-700 rounded px-2.5 pb-2.5 pt-5 w-full text-sm text-white appearance-none focus:outline-none focus:border-b-2 border-b-2 focus:border-orange-600 peer ${
+                errorMessage.email ? " border-orange-600" : "border-neutral-700"
+              }`}
+              placeholder=" "
               onBlur={() => setErrorMessage({ email: "" })}
             />
-            <p className="text-sm text-red-600 mt-1 font-medium">
+            <label
+              htmlFor="floating_filled"
+              className="absolute text-sm text-gray-300 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] left-2.5 peer-focus:text-gray-300 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4"
+            >
+              Email
+            </label>
+            <p className="text-sm text-orange-600 mt-1 font-medium">
               {errorMessage.email}
             </p>
           </div>
-          <div className="flex flex-col mb-8 w-80">
+          <div className="flex flex-col mb-6 w-80 relative">
             <input
               ref={pRef}
+              id="floating_filled"
               type="password"
-              className="placeholder-gray-300 pl-4 py-3 rounded text-white bg-neutral-700 focus:bg-neutral-600 outline-none"
-              placeholder="Password"
+              className={`block bg-neutral-700 rounded px-2.5 pb-2.5 pt-5 w-full text-sm text-white appearance-none focus:outline-none focus:border-b-2 border-b-2 focus:border-orange-600 peer ${
+                errorMessage.password
+                  ? " border-orange-600"
+                  : "border-neutral-700"
+              }`}
+              placeholder=" "
               onBlur={() => setErrorMessage({ password: "" })}
             />
-            <p className="text-sm text-red-600 mt-1 font-medium break-keep">
+            <label
+              htmlFor="floating_filled"
+              className="absolute text-sm text-gray-300 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] left-2.5 peer-focus:text-gray-300 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4"
+            >
+              Password
+            </label>
+            <p className="text-sm text-orange-600 mt-1 font-medium break-keep">
               {errorMessage.password}
             </p>
           </div>
