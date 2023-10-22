@@ -10,8 +10,11 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { auth } from "../utils/firebase";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const eRef = useRef(null);
   const pRef = useRef(null);
   const nameRef = useRef(null);
@@ -33,20 +36,6 @@ const Login = () => {
     setIsSignInForm(!isSignInForm);
   };
 
-  const validateFormData = () => {
-    const validEmailResult = checkValidEmail(eRef.current.value);
-    const validPasswordResult = checkValidPassword(pRef.current.value);
-    let validNameResult = null;
-    if (!isSignInForm) {
-      validNameResult = checkValidName(nameRef.current.value);
-    }
-
-    setErrorMessage({
-      email: validEmailResult,
-      password: validPasswordResult,
-      name: validNameResult,
-    });
-  };
 
   const handleSignUp = () => {
     createUserWithEmailAndPassword(auth, eRef.current.value, pRef.current.value)
@@ -68,6 +57,7 @@ const Login = () => {
         // Signed in
         const user = userCredential.user;
         console.log(user);
+        navigate("/browse");
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -78,14 +68,24 @@ const Login = () => {
 
   const handleClick = () => {
     //validate form data
-    validateFormData();
-    console.log(errorMessage);
+    const validEmailResult = checkValidEmail(eRef.current.value);
+    const validPasswordResult = checkValidPassword(pRef.current.value);
+    let validNameResult = null;
+    if (!isSignInForm) {
+      validNameResult = checkValidName(nameRef.current.value);
+    }
+
+    setErrorMessage({
+      email: validEmailResult,
+      password: validPasswordResult,
+      name: validNameResult,
+    });
+
     if (
-      errorMessage.email !== null ||
-      errorMessage.name !== null ||
-      errorMessage.password !== null
+      validEmailResult !== null ||
+      validPasswordResult !== null ||
+      validNameResult !== null
     ) {
-     console.log(errorMessage);
       return;
     }
 
