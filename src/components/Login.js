@@ -8,6 +8,7 @@ import {
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
 import { auth } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
@@ -36,12 +37,21 @@ const Login = () => {
     setIsSignInForm(!isSignInForm);
   };
 
-
   const handleSignUp = () => {
     createUserWithEmailAndPassword(auth, eRef.current.value, pRef.current.value)
       .then((userCredential) => {
         const user = userCredential.user;
-        console.log(user);
+        updateProfile(user, {
+          displayName: "hey",
+          photoURL: "https://example.com/jane-q-user/profile.jpg",
+        })
+          .then(() => {
+            console.log(user);
+            navigate("/browse");
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       })
       .catch((error) => {
         const errorCode = error.code;

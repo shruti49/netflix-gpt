@@ -1,6 +1,6 @@
 import { Provider } from "react-redux";
 import Body from "./components/Body";
-import appStore from "./firebase/store";
+import appStore from "./redux/store";
 
 function App() {
   return (

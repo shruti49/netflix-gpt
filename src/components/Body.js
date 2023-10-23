@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { auth } from "../utils/firebase";
 import { useDispatch } from "react-redux";
-import { addUser, removeUser } from "../firebase/UserSlice";
+import { addUser, removeUser } from "../redux/UserSlice";
 
 const appRouter = createBrowserRouter([
   {
@@ -29,7 +29,6 @@ const Body = () => {
       if (user) {
         const { uid, email, displayName } = user.uid;
         dispatch(addUser({ uid: uid, email: email, displayName: displayName }));
-
       } else {
         dispatch(removeUser());
       }
