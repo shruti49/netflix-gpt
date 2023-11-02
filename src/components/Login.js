@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Header from "./Header";
 import {
   checkValidEmail,
@@ -8,13 +8,16 @@ import {
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  updateProfile,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { auth } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addUser, removeUser } from "../redux/UserSlice";
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const eRef = useRef(null);
   const pRef = useRef(null);
@@ -40,18 +43,8 @@ const Login = () => {
   const handleSignUp = () => {
     createUserWithEmailAndPassword(auth, eRef.current.value, pRef.current.value)
       .then((userCredential) => {
-        const user = userCredential.user;
-        updateProfile(user, {
-          displayName: "hey",
-          photoURL: "https://example.com/jane-q-user/profile.jpg",
-        })
-          .then(() => {
-            console.log(user);
-            navigate("/browse");
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        console.log("User created successfully");
+        navigate("/browse");
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -64,9 +57,7 @@ const Login = () => {
   const handleSignIn = () => {
     signInWithEmailAndPassword(auth, eRef.current.value, pRef.current.value)
       .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-        console.log(user);
+        console.log("User signed in successfully");
         navigate("/browse");
       })
       .catch((error) => {
@@ -105,6 +96,26 @@ const Login = () => {
       handleSignIn();
     }
   };
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const { uid, email } = user;
+        dispatch(
+          addUser({
+            uid: uid,
+            email: email,
+            displayName: nameRef?.current?.value,
+            photoURL:
+              "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png",
+          })
+        );
+      } else {
+        dispatch(removeUser());
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="overflow-hidden relative">
