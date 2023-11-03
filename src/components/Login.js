@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import Header from "./Header";
 import {
   checkValidEmail,
@@ -8,15 +8,14 @@ import {
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  onAuthStateChanged,
+  updateProfile,
 } from "firebase/auth";
 import { auth } from "../utils/firebase";
-import { useNavigate } from "react-router-dom";
+import { addUser } from "../redux/UserSlice";
 import { useDispatch } from "react-redux";
-import { addUser, removeUser } from "../redux/UserSlice";
+import { USER_AVATAR } from "../utils/constants";
 
 const Login = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const eRef = useRef(null);
@@ -40,11 +39,32 @@ const Login = () => {
     setIsSignInForm(!isSignInForm);
   };
 
+
   const handleSignUp = () => {
     createUserWithEmailAndPassword(auth, eRef.current.value, pRef.current.value)
       .then((userCredential) => {
-        console.log("User created successfully");
-        navigate("/browse");
+        updateProfile(auth.currentUser, {
+          displayName: nameRef.current.value,
+          photoURL: USER_AVATAR,
+        })
+          .then(() => {
+            const { uid, email, displayName, photoURL } = auth.currentUser;
+            dispatch(
+              addUser({
+                uid: uid,
+                email: email,
+                displayName: displayName,
+                photoURL: photoURL,
+              })
+            );
+            console.log("User created successfully");
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+
+            console.log(errorCode, errorMessage);
+          });
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -57,8 +77,8 @@ const Login = () => {
   const handleSignIn = () => {
     signInWithEmailAndPassword(auth, eRef.current.value, pRef.current.value)
       .then((userCredential) => {
+        console.log(userCredential.user);
         console.log("User signed in successfully");
-        navigate("/browse");
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -96,26 +116,6 @@ const Login = () => {
       handleSignIn();
     }
   };
-
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const { uid, email } = user;
-        dispatch(
-          addUser({
-            uid: uid,
-            email: email,
-            displayName: nameRef?.current?.value,
-            photoURL:
-              "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png",
-          })
-        );
-      } else {
-        dispatch(removeUser());
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div className="overflow-hidden relative">

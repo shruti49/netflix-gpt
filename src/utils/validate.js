@@ -8,13 +8,13 @@ export const checkValidEmail = (email) => {
 };
 
 export const checkValidPassword = (password) => {
-  const isValidPassword =
-    /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^*-]).{8,}$/.test(
-      password
-    );
+  // const isValidPassword =
+  //   /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^*-]).{8,}$/.test(
+  //     password
+  //   );
 
-  if (!isValidPassword)
-    return "Your password must contain atleast 8 characters, one lowercase letter,one uppercase letter,one number and one special character.";
+  // if (!isValidPassword)
+  //   return "Your password must contain atleast 8 characters, one lowercase letter,one uppercase letter,one number and one special character.";
   return null;
 };
 
