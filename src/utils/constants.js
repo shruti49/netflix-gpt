@@ -3,7 +3,7 @@ export const LOGO = "Netflix_Logo_PMS.png";
 export const USER_AVATAR =
   "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png";
 
-export const options = {
+export const API_OPTIONS = {
   method: "GET",
   headers: {
     accept: "application/json",
@@ -13,4 +13,4 @@ export const options = {
 };
 
 export const TMDB_API_KEY =
-  "https://api.themoviedb.org/3/movie/now_playing?page=1";
+  "https://api.themoviedb.org/3/movie/";

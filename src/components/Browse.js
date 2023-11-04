@@ -1,21 +1,26 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Header from "./Header";
-import { TMDB_API_KEY, options } from "../utils/constants";
+import useNowPlayingMovies from "../customHooks/useFetchMovies";
+import VideoContainer from "./VideoContainer";
+import MovieContainer from "./MovieContainer";
 
 const Browse = () => {
-  const fetchMovies = async () => {
-    const response = await fetch(TMDB_API_KEY, options);
-    const data = await response.json();
-    console.log(data.results);
-  };
-
-  useEffect(() => {
-    fetchMovies();
-  }, []);
+  useNowPlayingMovies();
 
   return (
     <div>
       <Header />
+      <VideoContainer />
+      {/* <MovieContainer /> */}
+      
+      {/* 
+        VideoContainer
+            - Video Background
+            - Video Title
+        MovieContainer
+            - Movie List * n
+            - Cards * n 
+      */}
     </div>
   );
 };
